@@ -15,7 +15,7 @@ gmsh.model.add("mesh")
 
 We can set the size of our mesh using:
 ```
-lc = 5e-4
+lc = 1e-3
 ```
 Models in GMSH consist of a series of:
 - Points
@@ -155,7 +155,7 @@ gmsh.finalize()
 ```
 We have now created our mesh! 
 
-However, for use in FESTIM, our mesh now has to be converted into an XDMF, and the surfaces and volume IDs extracted.
+However, for use in FESTIM, our mesh now has to be converted into XDMF files, and the surfaces and volume IDs extracted.
 
 This can be done using meshio via the following process:
 ```
@@ -210,6 +210,39 @@ msh = meshio.read("my_mesh.msh")
  meshio.write("volume_mesh.xdmf", tetra_mesh)
  meshio.write("surface_mesh.xdmf", triangle_mesh)
 ```
+A FESTIM simulation can then be run:
+
+```
+import festim as F
+
+model = F.Simulation()
+
+model.mesh = F.MeshFromXDMF(volume_file ="volume_mesh.xdmf", boundary_file = "surface_mesh.xdmf")
+
+model.materials = [F.Material(id=1, D_0=1, E_D=0),
+                   F.Material(id=2, D_0=5, E_D=0)]
+
+model.T = F.Temperature(800)
+
+model.boundary_conditions = [F.DirichletBC(surfaces = [top_id], value = 1, field = 0),
+                             F.DirichletBC(surfaces = [inner_cylinder_surface_id], value = 0, field = 0)]
+
+model.exports = [F.XDMFExport("solute")]
+
+model.settings = F.Settings(
+    absolute_tolerance=1e-10,
+    relative_tolerance=1e-10,
+    transient=False,
+)
+
+model.initialise()
+model.run()
+
+```
+This produces the following visualisation in Paraview:
+
+<img width="910" alt="Screenshot 2024-09-11 at 17 57 57" src="https://github.com/user-attachments/assets/e310033a-8837-4d3f-adbd-fcf95e033cbf">
+
 
 
 
