@@ -1,4 +1,4 @@
-## Using the GMSH Python_API to generate meshes
+## Using the GMSH Python-API to generate meshes
 
 The Python API of GMSH can be used to create meshes that are useable in FESTIM. Here we will walk through its usage when creating a monoblock subsection consisting of tungsten surrounding a tube of CuCrZr
 
